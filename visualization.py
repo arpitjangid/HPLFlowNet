@@ -9,20 +9,26 @@ import pickle
 SCALE_FACTOR = 0.05
 MODE = 'sphere'
 DRAW_LINE = True
+DRAW_PRED_FLOW = True # arpit
+DRAW_GT_FLOW = False # one of these two can be True at a time
 
 if '-h' in ' '.join(sys.argv):
 	print('Usage: python3 visu_new.py VISU_PATH')
 	sys.exit(0)
 
-visu_path = sys.argv[1]
+# visu_path = sys.argv[1]
+visu_path = "./visu_ours_KITTI_8192_35m/"
 all_epe3d = np.load(osp.join(visu_path, 'epe3d_per_frame.npy'))
 
 path_list = None
 if osp.exists(osp.join(visu_path, 'sample_path_list.pickle')):
 	with open(osp.join(visu_path, 'sample_path_list.pickle'), 'rb') as fd:
 		path_list = pickle.load(fd)
+		print("path_list", path_list)
 		
-for index in range(len(path_list)):
+for index in range(10): #len(path_list)):
+	if index!=4:
+		continue
 	pc1 = np.load(osp.join(visu_path, 'pc1_'+str(index)+'.npy')).squeeze()
 	pc2 = np.load(osp.join(visu_path, 'pc2_'+str(index)+'.npy')).squeeze()
 	sf = np.load(osp.join(visu_path,  'sf_'+str(index)+'.npy')).squeeze()
@@ -66,12 +72,27 @@ for index in range(len(path_list)):
 
 		inner_index = 0
 		for i in range(gt.shape[0]):
-			x.append(gt[i, 0])
-			x.append(pred[i, 0])
-			y.append(gt[i, 1])
-			y.append(pred[i, 1])
-			z.append(gt[i, 2])
-			z.append(pred[i, 2])
+			if DRAW_PRED_FLOW:
+				x.append(pc1[i, 0])
+				x.append(pred[i, 0])
+				y.append(pc1[i, 1])
+				y.append(pred[i, 1])
+				z.append(pc1[i, 2])
+				z.append(pred[i, 2])
+			elif DRAW_GT_FLOW:
+				x.append(pc1[i, 0])
+				x.append(gt[i, 0])
+				y.append(pc1[i, 1])
+				y.append(gt[i, 1])
+				z.append(pc1[i, 2])
+				z.append(gt[i, 2])
+			else:
+				x.append(gt[i, 0])
+				x.append(pred[i, 0])
+				y.append(gt[i, 1])
+				y.append(pred[i, 1])
+				z.append(gt[i, 2])
+				z.append(pred[i, 2])
 
 			connections.append(np.vstack(
 				[np.arange(inner_index,   inner_index + N - 1.5),
