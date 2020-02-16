@@ -65,7 +65,38 @@ def display_clust_mayavi(clusters, coords):
 	mlab.show()
 	pass
 
-def display_clust_o3d(clusters, coords):
+def get_lines(bbox):
+	inds = np.array([[0, 0, 0],
+		[1, 0, 0],
+		[0, 1, 0],
+		[1, 1, 0],
+		[0, 0, 1],
+		[1, 0, 1],
+		[0, 1, 1],
+		[1, 1, 1]])
+	inds[np.where(inds==1)] += 2 # to shift to max coordinate indices
+	inds += np.array([0,1,2])
+	points = bbox[inds]
+	# print("bbox", bbox)
+	# print("points",points)
+	# exit()
+	lines = np.array([
+		[0, 1],
+		[0, 2],
+		[1, 3],
+		[2, 3],
+		[4, 5],
+		[4, 6],
+		[5, 7],
+		[6, 7],
+		[0, 4],
+		[1, 5],
+		[2, 6],
+		[3, 7],
+		])
+	return points, lines
+
+def display_clust_o3d(clusters, coords, bboxes):
 	barColors = [(240,163,255),(0,117,220),(153,63,0),
 	(76,0,92),(25,25,25),(0,92,49),
 	(43,206,72),(255,204,153),(128,128,128),
@@ -74,6 +105,7 @@ def display_clust_o3d(clusters, coords):
 	(255,0,16),(94,241,242),(0,153,143),(224,255,102),
 	(116,10,255),(153,0,0),(255,255,128),(255,255,0),(255,80,5)]
 	noiseColor = (np.array([(0,0,0)])).astype(np.float_)
+	# noiseColor = (np.array([(0,1,0)])).astype(np.float_)
 
 	barColors = (np.array(barColors)/255).astype(np.float_)
 
@@ -83,16 +115,36 @@ def display_clust_o3d(clusters, coords):
 	color_vec = np.zeros((num_points,3),dtype=np.float_)
 	for i, indxs in enumerate(clusters):
 		if i==len(clusters)-1: # noise points
+			print("noise points")
 			color_vec[indxs] = noiseColor
+		else:
 		# cluster_coords = coords[cluster]
 		# pcd.points = o3d.utility.Vector3dVector(cluster_coords)
-		color_vec[indxs] = barColors[i%len(barColors)]
+			color_vec[indxs] = barColors[i%len(barColors)]
 		
 	pcd.colors = o3d.utility.Vector3dVector(color_vec)
 	# o3d.io.write_point_cloud("tmp.ply", pcd)
 	# pcd_load = o3d.io.read_point_cloud("tmp.ply")
+	# o3d.visualization.draw_geometries([pcd])
 
-	o3d.visualization.draw_geometries([pcd])
+	
+	#drawing object bboxes
+	points = []
+	lines = []
+	for i in range(len(bboxes)-1): # ignoring last bbox (represents noise in current segmentation)
+		p, l = get_lines(bboxes[i]) # expecting p and l to be np arrays
+		points.append(p)
+		lines.append(l + i*8)
+	points = np.vstack(points)
+	lines = np.vstack(lines)
+	line_set = o3d.geometry.LineSet(
+		points=o3d.utility.Vector3dVector(points),
+		lines=o3d.utility.Vector2iVector(lines),
+	)
+	colors = [[1, 0, 0] for i in range(8*len(bboxes))]
+	line_set.colors = o3d.utility.Vector3dVector(colors)
+	o3d.visualization.draw_geometries([pcd, line_set])
+	
 		
 def get_bboxes(clusters, coords):
 	out = []
@@ -116,8 +168,9 @@ if __name__ == "__main__":
 
 	flow_weight = 10 #10 #20
 	for index in range(10):#len(path_list)):
-		if index != 4:
-			continue
+		print ("results for index:", index)
+		# if index != 4:
+		# 	continue
 		pc1 = np.load(osp.join(visu_path, 'pc1_'+str(index)+'.npy')).squeeze()
 		sf = np.load(osp.join(visu_path,  'sf_'+str(index)+'.npy')).squeeze() # to check results with gt sceneflow
 		output = np.load(osp.join(visu_path, 'output_'+str(index)+'.npy')).squeeze()
@@ -135,12 +188,12 @@ if __name__ == "__main__":
 		eps = 1
 		clusters_out = dbscan(feat_output,min_samples=min_samples, eps = eps)
 		print("num clusters pred sceneflow",len(clusters_out))
-		display_clust_o3d(clusters_out, pc1)
-		# bboxes = get_bboxes(clusters_out, pc1)
-		print('bboxes', bboxes.shape)
-		# clusters_gt = kmeans(feat_gt)
+		bboxes = get_bboxes(clusters_out, pc1)
+		display_clust_o3d(clusters_out, pc1, bboxes)
+		# print('bboxes', bboxes.shape)
 		
 		clusters_gt = dbscan(feat_gt, min_samples=min_samples, eps = eps)
+		bboxes = get_bboxes(clusters_gt, pc1)
 		print("num clusters gt",len(clusters_gt))
-		# display_clust_o3d(clusters_gt, pc1)
+		display_clust_o3d(clusters_gt, pc1, bboxes)
 
