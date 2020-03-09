@@ -6,30 +6,39 @@ import pickle
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN 
 from sklearn.cluster import OPTICS
+from sklearn.cluster import MeanShift
 import open3d as o3d
 
 SCALE_FACTOR = 0.05
 MODE = 'sphere'
 
-def dbscan(features, min_samples=50, eps = 1, if_optics=False):
-	if(if_optics):
-		db = OPTICS(min_samples=min_samples).fit(features)
-	else:
-		db = DBSCAN(eps=eps, min_samples=min_samples).fit(features)
-	
-	labels = db.labels_
+def group(labels):
 	unique_labels = set(labels)
 	# print("unique labels",len(unique_labels)) # including noise
 	label_indxs = []
+	noise_ids = []
 	for la in unique_labels:
-		if la==-1: # noise
+		if la==-1: # noise # for dbscan
 			noise_ids = np.where(labels == la)[0]
 			continue
 		ids = np.where(labels == la)[0]
 		label_indxs.append(ids)
-	label_indxs.append(noise_ids) # noise points in the end
+	if(len(noise_ids)):
+		label_indxs.append(noise_ids) # noise points in the end
 	# print("label_indxs",len(label_indxs))
 	return label_indxs #, noise_ids
+
+def dbscan(features, min_samples=50, eps = 1, if_optics=False, algorithm='auto'):
+	if(if_optics):
+		db = OPTICS(min_samples=min_samples).fit(features)
+	else:
+		# db = DBSCAN(eps=eps, min_samples=min_samples).fit(features)
+		db = DBSCAN(eps=eps, min_samples=min_samples, algorithm=algorithm).fit(features)
+	
+	labels = db.labels_
+	label_indxs = group(labels)
+	return label_indxs
+
 		
 def kmeans(features, n_clusters):
 	kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(features)
@@ -45,6 +54,11 @@ def kmeans(features, n_clusters):
 	# print("label_indxs", label_indxs)
 	
 	return label_indxs
+
+def meanshift(features):
+	clustering = MeanShift(cluster_all=False).fit(features)
+	labels = clustering.labels_
+	return group(labels)
 
 def display_clust_mayavi(clusters, coords):
 	fig = mlab.figure(figure=None, bgcolor=(0,0,0), fgcolor=(1,1,1), engine=None, size=(1600, 1000))
@@ -96,7 +110,7 @@ def get_lines(bbox):
 		])
 	return points, lines
 
-def display_clust_o3d(clusters, coords, bboxes):
+def display_clust_o3d(clusters, coords, bboxes, method):
 	barColors = [(240,163,255),(0,117,220),(153,63,0),
 	(76,0,92),(25,25,25),(0,92,49),
 	(43,206,72),(255,204,153),(128,128,128),
@@ -114,8 +128,8 @@ def display_clust_o3d(clusters, coords, bboxes):
 	num_points = len(coords)
 	color_vec = np.zeros((num_points,3),dtype=np.float_)
 	for i, indxs in enumerate(clusters):
-		if i==len(clusters)-1: # noise points
-			print("noise points")
+		if i==len(clusters)-1 and method=='DBSCAN': # noise points
+			# print("noise points")
 			color_vec[indxs] = noiseColor
 		else:
 		# cluster_coords = coords[cluster]
@@ -166,34 +180,51 @@ if __name__ == "__main__":
 			path_list = pickle.load(fd)
 			# print("path_list", path_list)
 
-	flow_weight = 10 #10 #20
-	for index in range(10):#len(path_list)):
+	# print("len",len(path_list))
+	coord_weight = 1
+	flow_weight = 10# 10 #10 #20
+	min_samples = 50
+	eps = 1 #1
+	algo = 'ball_tree'
+	for index in range(len(path_list)):
 		print ("results for index:", index)
-		# if index != 4:
+		# if index != 17:
 		# 	continue
 		pc1 = np.load(osp.join(visu_path, 'pc1_'+str(index)+'.npy')).squeeze()
 		sf = np.load(osp.join(visu_path,  'sf_'+str(index)+'.npy')).squeeze() # to check results with gt sceneflow
-		output = np.load(osp.join(visu_path, 'output_'+str(index)+'.npy')).squeeze()
+		pred_flow = np.load(osp.join(visu_path, 'output_'+str(index)+'.npy')).squeeze()
 		print("path", path_list[index])
 		if pc1.shape[1] != 3:
 			pc1 = pc1.T
 			sf = sf.T
-			output = output.T
+			pred_flow = pred_flow.T
+		# subtracting median flow
+		# median_flow = np.median(pred_flow, axis=0)
+		# pred_flow = pred_flow - median_flow
+		# mean_flow = np.mean(pred_flow, axis=0)
+		# pred_flow = pred_flow - mean_flow
 
-		feat_output = np.hstack((pc1,flow_weight*output))
-		feat_gt = np.hstack((pc1,sf))
-		print('feat_output, feat_gt',feat_output.shape, feat_gt.shape)
-		# n_clusters = 5
-		min_samples = 50
-		eps = 1
-		clusters_out = dbscan(feat_output,min_samples=min_samples, eps = eps)
-		print("num clusters pred sceneflow",len(clusters_out))
-		bboxes = get_bboxes(clusters_out, pc1)
-		display_clust_o3d(clusters_out, pc1, bboxes)
-		# print('bboxes', bboxes.shape)
 		
+		# print('feat_pred_flow, feat_gt',feat_pred_flow.shape, feat_gt.shape)
+		# ## n_clusters = 5
+
+		# visualize results with predicted scene flow
+		# feat_pred_flow = np.hstack((coord_weight*pc1,flow_weight*pred_flow))
+		# clusters_out = dbscan(feat_pred_flow,min_samples=min_samples, eps = eps)
+		# print("num clusters pred sceneflow",len(clusters_out))
+		# bboxes = get_bboxes(clusters_out, pc1)
+		# display_clust_o3d(clusters_out, pc1, bboxes)
+		## print('bboxes', bboxes.shape)
+		
+		method = 'MEANSHIFT'
+		# method = 'DBSCAN'
+		## visualize results with gt scene-flow
+		feat_gt = np.hstack((coord_weight*pc1,flow_weight*sf))
 		clusters_gt = dbscan(feat_gt, min_samples=min_samples, eps = eps)
+		# clusters_gt = dbscan(feat_gt, min_samples=min_samples, eps = eps, algorithm=algo)
+	
+		clusters_gt = meanshift(feat_gt)
 		bboxes = get_bboxes(clusters_gt, pc1)
 		print("num clusters gt",len(clusters_gt))
-		display_clust_o3d(clusters_gt, pc1, bboxes)
+		display_clust_o3d(clusters_gt, pc1, bboxes, method=method)
 
