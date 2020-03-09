@@ -1,0 +1,362 @@
+sys.argv:
+main.py configs/test_ours_KITTI.yaml
+NUMBA NUM THREADS	8
+DEVICE               cuda
+allow_less_points    True
+arch                 HPLFlowNet
+batch_size           1
+bcn_use_bias         True
+bcn_use_norm         True
+ckpt_dir             checkpoints/test/ours_KITTI_8192_35m
+data_process         {'DEPTH_THRESHOLD': 35.0, 'NO_CORR': True}
+data_root            /home/ajangid/HPLFlowNet/dataset_processed/
+dataset              KITTI
+dim                  3
+evaluate             True
+last_relu            False
+num_points           8192
+print_freq           50
+remove_ground        True
+resume               trained_models/ours.pth.tar
+scales_filter_map    [[3.0, 1, -1, -1], [2.0, 1, -1, -1], [1.0, 1, 1, 1], [0.5, 1, 1, 1], [0.25, 1, 1, 1], [0.125, 1, 1, 1], [0.0625, 1, 1, 1]]
+unsymmetric          True
+use_leaky            True
+workers              8
+
+mapping_path /home/ajangid/HPLFlowNet/datasets/KITTI_mapping.txt
+val_dataset: Dataset KITTI
+    Number of datapoints: 142
+    Number of points per point cloud: 8192
+    is removing ground: True
+    Root Location: /home/ajangid/HPLFlowNet/dataset_processed/KITTI_processed_occ_final
+    Transforms (if any): ProcessData
+                         (data_process_args: 
+                         	DEPTH_THRESHOLD: 35.0
+                         	NO_CORR: True
+                         	allow_less_points: True
+                         	num_points: 8192
+                         )
+
+=>  creating model 'HPLFlowNet'
+HPLFlowNet(
+  (conv1): Sequential(
+    (0): Conv1dReLU(
+      (composed_module): Sequential(
+        (0): Conv1d(3, 32, kernel_size=(1,), stride=(1,))
+        (1): LeakyReLU(negative_slope=0.1, inplace)
+      )
+    )
+    (1): Conv1dReLU(
+      (composed_module): Sequential(
+        (0): Conv1d(32, 32, kernel_size=(1,), stride=(1,))
+        (1): LeakyReLU(negative_slope=0.1, inplace)
+      )
+    )
+    (2): Conv1dReLU(
+      (composed_module): Sequential(
+        (0): Conv1d(32, 64, kernel_size=(1,), stride=(1,))
+        (1): LeakyReLU(negative_slope=0.1, inplace)
+      )
+    )
+  )
+  (bcn1): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn1_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(580, 1024, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(1024, 1024, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn2): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn2_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(324, 512, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(512, 512, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn3): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn3_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(388, 256, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (corr1): BilateralCorrelationFlex(
+    (corr_conv): Sequential(
+      (0): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(128, 32, kernel_size=(1, 15, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(32, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+    )
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(32, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn4): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn4_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(260, 256, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (corr2): BilateralCorrelationFlex(
+    (corr_conv): Sequential(
+      (0): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(192, 32, kernel_size=(1, 15, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(32, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+    )
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(32, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn5): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn5_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(260, 128, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (corr3): BilateralCorrelationFlex(
+    (corr_conv): Sequential(
+      (0): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(192, 32, kernel_size=(1, 15, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(32, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+    )
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(32, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn6): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn6_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(260, 128, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (corr4): BilateralCorrelationFlex(
+    (corr_conv): Sequential(
+      (0): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(192, 32, kernel_size=(1, 15, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(32, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+    )
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(32, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn7): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(68, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (bcn7_): BilateralConvFlex(
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(128, 128, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (corr5): BilateralCorrelationFlex(
+    (corr_conv): Sequential(
+      (0): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(192, 32, kernel_size=(1, 15, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv3dReLU(
+        (composed_module): Sequential(
+          (0): Conv3d(32, 32, kernel_size=(1, 1, 1), stride=(1, 1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+    )
+    (blur_conv): Sequential(
+      (0): Conv2dReLU(
+        (composed_module): Sequential(
+          (0): Conv2d(32, 64, kernel_size=(15, 1), stride=(1, 1))
+          (1): LeakyReLU(negative_slope=0.1, inplace)
+        )
+      )
+      (1): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1))
+    )
+  )
+  (conv2): Conv1dReLU(
+    (composed_module): Sequential(
+      (0): Conv1d(1024, 1024, kernel_size=(1,), stride=(1,))
+      (1): LeakyReLU(negative_slope=0.1, inplace)
+    )
+  )
+  (conv3): Conv1dReLU(
+    (composed_module): Sequential(
+      (0): Conv1d(1024, 512, kernel_size=(1,), stride=(1,))
+      (1): LeakyReLU(negative_slope=0.1, inplace)
+    )
+  )
+  (conv4): Conv1d(512, 3, kernel_size=(1,), stride=(1,))
+)
+=> loading checkpoint 'trained_models/ours.pth.tar'
+=> loaded checkpoint 'trained_models/ours.pth.tar' (start epoch 598, min loss 0.0802982104396658)
+num_sampled_batches 1
+len(val_loader) 142
+Test: [1/142]	EPE3D 0.0552 (0.0552)	ACC3DS 0.4313 (0.4313)	ACC3DR 0.9445 (0.9445)	Outliers3D 0.7876 (0.7876)	EPE2D 2.0516 (2.0516)	ACC2D 0.8384 (0.8384)
+Test: [51/142]	EPE3D 0.2392 (0.1083)	ACC3DS 0.1318 (0.4972)	ACC3DR 0.4380 (0.8029)	Outliers3D 0.5620 (0.3711)	EPE2D 13.0104 (4.7610)	ACC2D 0.1455 (0.5890)
+Test: [101/142]	EPE3D 0.0393 (0.1255)	ACC3DS 0.8633 (0.4492)	ACC3DR 0.9492 (0.7696)	Outliers3D 0.3683 (0.3995)	EPE2D 1.4833 (5.3087)	ACC2D 0.9456 (0.5560)
+ * EPE3D 0.1158	ACC3DS 0.4726	ACC3DR 0.7822	Outliers3D 0.4135	EPE2D 4.7460	ACC2D 0.5899

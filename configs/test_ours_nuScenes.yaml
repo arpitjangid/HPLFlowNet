@@ -1,4 +1,4 @@
-ckpt_dir: checkpoints/test/ours_KITTI_8192_35m
+# ckpt_dir: checkpoints/test/ours_nuscenes
 resume: trained_models/ours.pth.tar
 evaluate: True
 
@@ -29,7 +29,7 @@ num_points: 8192
 
 DEVICE: cuda
 
-dataset: KITTI
+dataset: NUSCENES
 remove_ground: True
 
 data_process:
@@ -39,8 +39,10 @@ data_process:
 print_freq: 50
 workers: 8
 data_root: /home/ajangid/HPLFlowNet/dataset_processed/
-
-
+folder_name: nuScenes_pointclouds_diff_10
+ckpt_dir: checkpoints/test/ours_nuscenes_diff10
+# folder_name: nuScenes_pointclouds_diff2
+# ckpt_dir: checkpoints/test/ours_nuscenes_diff2
 
 
 

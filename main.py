@@ -20,9 +20,11 @@ import cmd_args
 from main_utils import *
 
 from models import EPE3DLoss
-from evaluation_bnn import evaluate
+# from evaluation_bnn import evaluate
+from evaluation_bnn_nuscenes import evaluate
 
-
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID" 
+os.environ["CUDA_VISIBLE_DEVICES"]="3"
 def main():
     # ensure numba JIT is on
     if 'NUMBA_DISABLE_JIT' in os.environ:
@@ -33,12 +35,13 @@ def main():
     args = cmd_args.parse_args_from_yaml(sys.argv[1])
 
     # -------------------- logging args --------------------
-    if osp.exists(args.ckpt_dir):
-        to_continue = query_yes_no('Attention!!!, ckpt_dir already exists!\
-                                        Whether to continue?',
-                                   default=None)
-        if not to_continue:
-            sys.exit(1)
+    ## commented for running on sbatch
+    # if osp.exists(args.ckpt_dir):
+    #     to_continue = query_yes_no('Attention!!!, ckpt_dir already exists!\
+    #                                     Whether to continue?',
+    #                                default=None)
+    #     if not to_continue:
+    #         sys.exit(1)
     os.makedirs(args.ckpt_dir, mode=0o777, exist_ok=True)
 
     logger = Logger(osp.join(args.ckpt_dir, 'log'))

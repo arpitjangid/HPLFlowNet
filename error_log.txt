@@ -1,0 +1,9 @@
++ set -u
++ set -e
+
+real	0m0.000s
+user	0m0.000s
+sys	0m0.000s
++ python3 main.py configs/test_ours_KITTI.yaml
+/home/ajangid/HPLFlowNet/cmd_args.py:61: YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated, as the default Loader is unsafe. Please read https://msg.pyyaml.org/load for full details.
+  args = yaml.load(fd)
